@@ -58,7 +58,7 @@ func PublicAuthFileRequested() gin.HandlerFunc {
 			}
 
 			if group.Name == "Public" {
-				c.JSON(200, serializer.ErrWithDetails(c, serializer.CodeGroupNotAllowed, "cannot be accessed anonymously", nil))
+				c.JSON(200, serializer.ErrWithDetails(c, serializer.CodeNotFound, "cannot be accessed anonymously", nil))
 				c.Abort()
 				return
 			}

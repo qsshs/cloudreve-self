@@ -42,8 +42,6 @@ func (s *ShareInfoService) Get(c *gin.Context) (*explorer.Share, error) {
 	dep := dependency.FromContext(c)
 	u := inventory.UserFromContext(c)
 	shareClient := dep.ShareClient()
-	userClient := dep.UserClient()
-	groupClient := dep.GroupClient()
 
 	ctx := context.WithValue(c, inventory.LoadShareUser{}, true)
 	ctx = context.WithValue(ctx, inventory.LoadShareFile{}, true)
@@ -56,12 +54,12 @@ func (s *ShareInfoService) Get(c *gin.Context) (*explorer.Share, error) {
 		return nil, serializer.NewError(serializer.CodeDBError, "Failed to get share", err)
 	}
 
-	shareUser, err := userClient.GetByID(c, share.ID)
+	shareUser, err := share.QueryUser().Only(ctx)
 	if err != nil {
 		return nil, serializer.NewError(serializer.CodeDBError, "Failed to get share owner", err)
 	}
 
-	shareGroup, err := groupClient.GetByID(c, shareUser.GroupUsers)
+	shareGroup, err := shareUser.QueryGroup().Only(ctx)
 	if err != nil {
 		return nil, serializer.NewError(serializer.CodeDBError, "Failed to get share owner's group", err)
 	}
