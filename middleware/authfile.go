@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/cloudreve/Cloudreve/v4/application/dependency"
+	"github.com/cloudreve/Cloudreve/v4/ent/user"
 	"github.com/cloudreve/Cloudreve/v4/inventory"
 
 	"github.com/cloudreve/Cloudreve/v4/pkg/serializer"
@@ -21,7 +22,7 @@ func PublicAuthFileRequested() gin.HandlerFunc {
 		}
 
 		u := inventory.UserFromContext(c)
-		if u.ID == 0 && strings.HasSuffix(qPath, "@share") && strings.HasPrefix(qPath, "cloudreve://") {
+		if (u.ID == 0 || u.Status != user.DefaultStatus) && strings.HasSuffix(qPath, "@share") && strings.HasPrefix(qPath, "cloudreve://") {
 			id_ps := strings.TrimPrefix(strings.TrimSuffix(qPath, "@share"), "cloudreve://")
 			ss := strings.Split(id_ps, ":")
 			shareID := ""

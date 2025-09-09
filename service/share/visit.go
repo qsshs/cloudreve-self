@@ -5,6 +5,7 @@ import (
 
 	"github.com/cloudreve/Cloudreve/v4/application/dependency"
 	"github.com/cloudreve/Cloudreve/v4/ent"
+	"github.com/cloudreve/Cloudreve/v4/ent/user"
 	"github.com/cloudreve/Cloudreve/v4/inventory"
 	"github.com/cloudreve/Cloudreve/v4/inventory/types"
 	"github.com/cloudreve/Cloudreve/v4/pkg/cluster/routes"
@@ -66,7 +67,7 @@ func (s *ShareInfoService) Get(c *gin.Context) (*explorer.Share, error) {
 	}
 
 	allow := true
-	if u.ID == 0 && shareGroup.Name == "Public" {
+	if (u.ID == 0 || u.Status != user.StatusActive) && shareGroup.Name == "Public" {
 		allow = false
 	}
 
