@@ -564,6 +564,7 @@ func initMasterRouter(dep dependency.Dep) *gin.Engine {
 			// List files
 			file.GET("",
 				controllers.FromQuery[explorer.ListFileService](explorer.ListFileParameterCtx{}),
+				middleware.PublicAuthFileRequested(),
 				controllers.ListDirectory,
 			)
 			file.GET("archive",
@@ -1011,7 +1012,6 @@ func initMasterRouter(dep dependency.Dep) *gin.Engine {
 				{
 					// 列出文件
 					file.POST("",
-						middleware.PublicAuthFileRequested(),
 						controllers.FromJSON[adminsvc.AdminListService](adminsvc.AdminListServiceParamsCtx{}),
 						controllers.AdminListFiles,
 					)
