@@ -24,12 +24,14 @@ func PublicAuthFileRequested() gin.HandlerFunc {
 		if u.ID == 0 && strings.HasSuffix(qPath, "@share") && strings.HasPrefix(qPath, "cloudreve://") {
 			id_ps := strings.TrimPrefix(strings.TrimSuffix(qPath, "@share"), "cloudreve://")
 			ss := strings.Split(id_ps, ":")
-			if len(ss) != 2 {
+			shareID := ""
+			if len(ss) == 2 || len(ss) == 1 {
+				shareID = ss[0]
+			} else {
 				c.JSON(200, serializer.ErrWithDetails(c, serializer.CodeParamErr, "Invalid file URI", nil))
 				c.Abort()
 				return
 			}
-			shareID, _ := ss[0], ss[1]
 			dep := dependency.FromContext(c)
 			shareClient := dep.ShareClient()
 
