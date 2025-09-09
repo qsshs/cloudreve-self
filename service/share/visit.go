@@ -45,6 +45,11 @@ func (s *ShareInfoService) Get(c *gin.Context) (*explorer.Share, error) {
 	ctx := context.WithValue(c, inventory.LoadShareUser{}, true)
 	ctx = context.WithValue(ctx, inventory.LoadShareFile{}, true)
 	share, err := shareClient.GetByID(ctx, hashid.FromContext(c))
+
+	if u.ID == 0 {
+		return nil, serializer.NewError(serializer.CodeNotFound, "请登录后访问!", nil)
+	}
+
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, serializer.NewError(serializer.CodeNotFound, "Share not found", nil)
