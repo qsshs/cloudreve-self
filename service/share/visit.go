@@ -41,23 +41,33 @@ func (s *ShareInfoService) Get(c *gin.Context) (*explorer.Share, error) {
 	dep := dependency.FromContext(c)
 	u := inventory.UserFromContext(c)
 	shareClient := dep.ShareClient()
+	userClient := dep.UserClient()
+	groupClient := dep.GroupClient()
 
 	ctx := context.WithValue(c, inventory.LoadShareUser{}, true)
 	ctx = context.WithValue(ctx, inventory.LoadShareFile{}, true)
+
 	share, err := shareClient.GetByID(ctx, hashid.FromContext(c))
-
-	allow := true
-	groupName := share.Edges.User.Edges.Group.Name
-
-	if u.ID == 0 && groupName == "Public" {
-		allow = false
-	}
-
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, serializer.NewError(serializer.CodeNotFound, "Share not found", nil)
 		}
 		return nil, serializer.NewError(serializer.CodeDBError, "Failed to get share", err)
+	}
+
+	shareUser, err := userClient.GetByID(c, share.ID)
+	if err != nil {
+		return nil, serializer.NewError(serializer.CodeDBError, "Failed to get share owner", err)
+	}
+
+	shareGroup, err := groupClient.GetByID(c, shareUser.GroupUsers)
+	if err != nil {
+		return nil, serializer.NewError(serializer.CodeDBError, "Failed to get share owner's group", err)
+	}
+
+	allow := true
+	if u.ID == 0 && shareGroup.Name == "Public" {
+		allow = false
 	}
 
 	if err := inventory.IsValidShare(share); err != nil {
@@ -96,7 +106,7 @@ func (s *ShareInfoService) Get(c *gin.Context) (*explorer.Share, error) {
 		res.SourceUri = root.Uri(true).String()
 	}
 
-	if allow {
+	if !allow {
 		res.Expired = true
 		res.Name = "请登录后访问!"
 	}

@@ -1011,6 +1011,7 @@ func initMasterRouter(dep dependency.Dep) *gin.Engine {
 				{
 					// 列出文件
 					file.POST("",
+						middleware.PublicAuthFileRequested(),
 						controllers.FromJSON[adminsvc.AdminListService](adminsvc.AdminListServiceParamsCtx{}),
 						controllers.AdminListFiles,
 					)
