@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"net/http"
+
 	"github.com/cloudreve/Cloudreve/v4/pkg/hashid"
 	"github.com/cloudreve/Cloudreve/v4/pkg/serializer"
 	"github.com/cloudreve/Cloudreve/v4/service/share"
+	"github.com/cloudreve/Cloudreve/v4/service/user"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 // CreateShare 创建分享
@@ -36,6 +38,13 @@ func EditShare(c *gin.Context) {
 func GetShare(c *gin.Context) {
 	service := ParametersFromContext[*share.ShareInfoService](c, share.ShareInfoParamCtx{})
 	info, err := service.Get(c)
+
+	user, _ := user.GetUser(c)
+	if user.ID == 0 {
+		info.Expired = true
+		info.Name = "请登录后访问!"
+	}
+
 	if err != nil {
 		c.JSON(200, serializer.Err(c, err))
 		return
