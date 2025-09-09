@@ -46,8 +46,11 @@ func (s *ShareInfoService) Get(c *gin.Context) (*explorer.Share, error) {
 	ctx = context.WithValue(ctx, inventory.LoadShareFile{}, true)
 	share, err := shareClient.GetByID(ctx, hashid.FromContext(c))
 
-	if u.ID == 0 {
-		return nil, serializer.NewError(serializer.CodeNotFound, "请登录后访问!", nil)
+	allow := true
+	groupName := share.Edges.User.Edges.Group.Name
+
+	if u.ID == 0 && groupName == "Public" {
+		allow = false
 	}
 
 	if err != nil {
@@ -91,6 +94,11 @@ func (s *ShareInfoService) Get(c *gin.Context) (*explorer.Share, error) {
 		}
 
 		res.SourceUri = root.Uri(true).String()
+	}
+
+	if allow {
+		res.Expired = true
+		res.Name = "请登录后访问!"
 	}
 
 	return res, nil
