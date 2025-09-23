@@ -22,7 +22,9 @@ func PublicAuthFileRequested() gin.HandlerFunc {
 		}
 
 		u := inventory.UserFromContext(c)
-		if (u.ID == 0 || u.Status != user.DefaultStatus) && strings.HasSuffix(qPath, "@share") && strings.HasPrefix(qPath, "cloudreve://") {
+		if (u.ID == 0 || u.Status != user.DefaultStatus) && strings.Contains(qPath, "@share") && strings.HasPrefix(qPath, "cloudreve://") {
+			bf, _, _ := strings.Cut(qPath, "@share")
+
 			id_ps := strings.TrimPrefix(strings.TrimSuffix(qPath, "@share"), "cloudreve://")
 			ss := strings.Split(id_ps, ":")
 			shareID := ""
